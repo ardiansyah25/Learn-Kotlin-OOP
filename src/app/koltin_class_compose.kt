@@ -1,4 +1,7 @@
-open class SmartDevice(val name:String,val category:String) {
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
+
+open class SmartDevice(val name:String, val category:String) {
 
     var deviceStatus = "online"
         protected set
@@ -22,20 +25,10 @@ open class SmartDevice(val name:String,val category:String) {
 
 class SmartTVDevice(deviceName:String,deviceCategory:String):SmartDevice(name = deviceName,category = deviceCategory){
 
-    override val deviceType = "Smart TV"
+    var speakerVolume by RangeRegulator(0,0,100)
+    var channelNumber by RangeRegulator(0,0,200)
 
-   private var speakerVolume = 2
-    set(value) {
-        if(value in 0..100){
-            field = value
-        }
-    }
-    private var channelNumber = 1
-    set(value) {
-        if(value in 0..200){
-            field = value
-        }
-    }
+    override val deviceType = "Smart TV"
 
     override fun turnOn() {
        super.turnOn()
@@ -55,9 +48,23 @@ class SmartTVDevice(deviceName:String,deviceCategory:String):SmartDevice(name = 
         println("Speaker Volume increase to $speakerVolume")
     }
 
+    fun decreaseSpeakerVolume(){
+        speakerVolume--
+        println("Speaker Volume decrease to $speakerVolume")
+    }
+
      fun nextChannel(){
         channelNumber++
         println("Channel number increased to $channelNumber")
+    }
+
+    fun previousChannel(){
+        channelNumber--
+        println("Channel number decreased to $channelNumber")
+    }
+
+    fun printDeviceInfo(){
+        println("Device name: $name , category: $category, type: $deviceType")
     }
 }
 
@@ -65,12 +72,7 @@ class SmartLightDevice(deviceName: String,deviceCategory: String): SmartDevice(n
 
     override val deviceType = "Smart Light"
 
-    private var brightnessLevel = 0
-    set(value) {
-        if(value in 0..100){
-            field = value
-        }
-    }
+    var brightnessLevel by RangeRegulator(2,0,100)
 
     override fun turnOn() {
        super.turnOn()
@@ -88,8 +90,13 @@ class SmartLightDevice(deviceName: String,deviceCategory: String): SmartDevice(n
     }
 
     fun increaseBrightness(){
-        brightnessLevel++;
+        brightnessLevel++
         println("Brightness increase to $brightnessLevel")
+    }
+
+    fun decreaseBrightness(){
+        brightnessLevel--
+        println("Brightness decrease to $brightnessLevel")
     }
 }
 
@@ -134,6 +141,25 @@ class SmartHome(
         turnOffTv()
         turnOffLight()
     }
+}
+
+class RangeRegulator(
+    initialValue:Int,
+    private val minValue:Int,
+    private val maxValue:Int
+):ReadWriteProperty<Any?,Int>{
+
+    var fielData = initialValue
+    override fun getValue(thisRef: Any?, property: KProperty<*>): Int {
+        return fielData
+    }
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: Int) {
+        if(value in minValue..maxValue){
+            fielData = value
+        }
+    }
+
 }
 
 fun main(){
